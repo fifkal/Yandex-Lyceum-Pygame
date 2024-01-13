@@ -1,5 +1,11 @@
 import pygame
 import os
+import pygame.camera
+
+pygame.init()
+pygame.camera.init()
+pygame.mixer.music.load('sound_effects/sword_sound (mp3cut.net) (2).mp3')
+ON_SIGHT = pygame.mixer.Sound('sound_effects/Kanye_West_-_On_Sight_47958363.mp3')
 
 pygame.init()
 size = width, height = 800, 800
@@ -56,9 +62,11 @@ is_jump = False
 jump = 20
 air = False
 attack = False
+sound_sword = False
 death = -1
 last_direction = 'RIGHT'
-fone = pygame.image.load('fone.png',)
+fone = pygame.image.load('fone_images/fone.png', )
+camera = pygame.Rect(0, 0, 10, 140)
 
 motion = False
 while running:
@@ -124,12 +132,19 @@ while running:
                 x, y = player.rect.x, player.rect.y
                 player_sprite.remove(player)
                 player = AnimatedSprite(load_image('Attack_2.png'), 3, 1, x, y)
+                sound_sword = True
             elif event.button == 1 and last_direction == 'LEFT':
                 x, y = player.rect.x, player.rect.y
                 player_sprite.remove(player)
                 player = AnimatedSprite(load_image('Attack_2_left.png'), 3, 1, x, y)
+                sound_sword = True
         if event.type == pygame.MOUSEBUTTONUP:
+            sound_sword = False
             all_keys = pygame.key.get_pressed()
+            if all_keys[pygame.K_d] and all_keys[pygame.K_a]:
+                x, y = player.rect.x, player.rect.y
+                player_sprite.remove(player)
+                player = AnimatedSprite(load_image('Hurt.png'), 2, 1, x, y)
             if not all_keys[pygame.K_d] and not all_keys[pygame.K_a] and not is_jump:
                 x, y = player.rect.x, player.rect.y
                 player_sprite.remove(player)
@@ -150,7 +165,10 @@ while running:
                 x, y = player.rect.x, player.rect.y
                 player_sprite.remove(player)
                 player = AnimatedSprite(load_image('Run.png'), 8, 1, x, y)
-    screen.blit(fone, (0, 0))
+
+    camera.x = player.rect.centerx - 150 / 2
+    camera.y = player.rect.centery - 1227 / 2
+    screen.blit(fone, (-camera.x, -camera.y))
     player_sprite.update()
     player_sprite.draw(screen)
     pygame.display.flip()
@@ -159,6 +177,8 @@ while running:
     if all_keys[pygame.K_SPACE] and not is_jump:
         x, y = player.rect.x, player.rect.y
         player_sprite.remove(player)
+        camera.x = player.rect.centerx - 150 / 2
+        camera.y = player.rect.centery - 1227 / 2
         player = AnimatedSprite(load_image('Jump.png'), 8, 1, x, y)
         is_jump = True
     # создание гравитации
@@ -220,6 +240,12 @@ while running:
     elif all_keys[pygame.K_a] and all_keys[pygame.K_LSHIFT] and not all_keys[pygame.K_d]:
         player.rect.x -= 15
         last_direction = 'LEFT'
+
+    if player.rect.x < -10:
+        player.rect.x = -10
+    elif player.rect.x > 666:
+        player.rect.x = 666
+
     clock.tick(15)
 
 pygame.quit()
