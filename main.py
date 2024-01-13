@@ -7,7 +7,7 @@ screen = pygame.display.set_mode(size)
 player_sprite = pygame.sprite.Group()
 
 
-def load_image(name, color_key=None):
+def load_image(name, color_key=None):  # загрузка изображений
     fullname = os.path.join('Enchantress', name)
     try:
         image = pygame.image.load(fullname)
@@ -22,7 +22,7 @@ def load_image(name, color_key=None):
     return image
 
 
-class AnimatedSprite(pygame.sprite.Sprite):
+class AnimatedSprite(pygame.sprite.Sprite):  # создание спрайтов
     def __init__(self, sheet, columns, rows, x, y):
         super().__init__(player_sprite)
         self.frames = []
@@ -65,7 +65,8 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        if event.type == pygame.KEYDOWN:
+        if event.type == pygame.KEYDOWN:  # проверка нажатия клавиш: клавиши A, D == влево и вправо соответственно,
+            # при нажатии пробела - прыжок, а с зажатым шифтом - бег
             all_keys = pygame.key.get_pressed()
             if all_keys[pygame.K_SPACE] and not all_keys[pygame.K_d] and not all_keys[pygame.K_a]:
                 x, y = player.rect.x, player.rect.y
@@ -94,6 +95,7 @@ while running:
                 player_sprite.remove(player)
                 player = AnimatedSprite(load_image('Run.png'), 8, 1, x, y)
         if event.type == pygame.KEYUP:
+            # проверка отпускания клавиши на переход на другую подходящую анимацию
             all_keys = pygame.key.get_pressed()
             if not all_keys[pygame.K_d] and not all_keys[pygame.K_a] and not is_jump:
                 x, y = player.rect.x, player.rect.y
@@ -116,6 +118,8 @@ while running:
                 player_sprite.remove(player)
                 player = AnimatedSprite(load_image('Run.png'), 8, 1, x, y)
         if event.type == pygame.MOUSEBUTTONDOWN:
+            # то же самое, что и с клавишами, но уже для нажатия мыши (атака, будет ещё подобие некой ульты, но сделаю
+            # потом
             if event.button == 1 and last_direction == 'RIGHT':
                 x, y = player.rect.x, player.rect.y
                 player_sprite.remove(player)
@@ -157,7 +161,7 @@ while running:
         player_sprite.remove(player)
         player = AnimatedSprite(load_image('Jump.png'), 8, 1, x, y)
         is_jump = True
-
+    # создание гравитации
     if is_jump:
         player.rect.y -= jump
         jump -= 5
@@ -166,7 +170,7 @@ while running:
             jump = 20
             player.rect.y += 20
             air = True
-
+    # переход на другую анимацию при приземлении персонажа
     if air and not all_keys[pygame.K_d] and not all_keys[pygame.K_a]:
         x, y = player.rect.x, player.rect.y
         player_sprite.remove(player)
@@ -203,6 +207,7 @@ while running:
         player = AnimatedSprite(load_image('Hurt.png'), 2, 1, x, y)
         air = False
 
+    # перемещение персонажа
     if all_keys[pygame.K_d] and not all_keys[pygame.K_a]:
         player.rect.x += 5
         last_direction = 'RIGHT'
