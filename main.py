@@ -13,6 +13,8 @@ pygame.init()
 size = width, height = 800, 800
 screen = pygame.display.set_mode(size)
 player_sprite = pygame.sprite.Group()
+pygame.mouse.set_visible(False)
+cursor1 = pygame.image.load('Ai_Cursor_Open.png')
 
 
 def load_image(name, color_key=None):  # загрузка изображений
@@ -72,7 +74,7 @@ fone = pygame.image.load('fone_images/fone.png', )
 camera = pygame.Rect(0, 0, 10, 140)
 
 motion = False
-ON_SIGHT.play()
+ON_SIGHT.play(-1)
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -89,8 +91,15 @@ while running:
                 x, y = player.rect.x, player.rect.y
                 player_sprite.remove(player)
                 player = AnimatedSprite(load_image('Hurt.png'), 2, 1, x, y)
-
-            if all_keys[pygame.K_d] and not all_keys[pygame.K_a] and not all_keys[pygame.K_LSHIFT] and not is_jump:
+            if pygame.mouse.get_pressed()[0] and all_keys[pygame.K_a]:
+                x, y = player.rect.x, player.rect.y
+                player_sprite.remove(player)
+                player = AnimatedSprite(load_image('Attack_2_left.png'), 3, 1, x, y)
+            elif pygame.mouse.get_pressed()[0] and all_keys[pygame.K_d]:
+                x, y = player.rect.x, player.rect.y
+                player_sprite.remove(player)
+                player = AnimatedSprite(load_image('Attack_2.png'), 3, 1, x, y)
+            elif all_keys[pygame.K_d] and not all_keys[pygame.K_a] and not all_keys[pygame.K_LSHIFT] and not is_jump:
                 x, y = player.rect.x, player.rect.y
                 player_sprite.remove(player)
                 player = AnimatedSprite(load_image('Walk.png'), 8, 1, x, y)
@@ -113,6 +122,14 @@ while running:
                 x, y = player.rect.x, player.rect.y
                 player_sprite.remove(player)
                 player = AnimatedSprite(load_image('Idle.png'), 5, 1, x, y)
+            if pygame.mouse.get_pressed()[0] and all_keys[pygame.K_a]:
+                x, y = player.rect.x, player.rect.y
+                player_sprite.remove(player)
+                player = AnimatedSprite(load_image('Attack_2_left.png'), 3, 1, x, y)
+            elif pygame.mouse.get_pressed()[0] and all_keys[pygame.K_d]:
+                x, y = player.rect.x, player.rect.y
+                player_sprite.remove(player)
+                player = AnimatedSprite(load_image('Attack_2.png'), 3, 1, x, y)
             elif all_keys[pygame.K_d] and not all_keys[pygame.K_a] and not all_keys[pygame.K_LSHIFT] and not is_jump:
                 x, y = player.rect.x, player.rect.y
                 player_sprite.remove(player)
@@ -175,6 +192,10 @@ while running:
     screen.blit(fone, (-camera.x, -camera.y))
     player_sprite.update()
     player_sprite.draw(screen)
+    pos = pygame.mouse.get_pos()
+    if pygame.mouse.get_focused():
+        screen.blit(cursor1, (pos[0], pos[1]))
+    pygame.display.update()
     pygame.display.flip()
     all_keys = pygame.key.get_pressed()
     if sound_sword:
