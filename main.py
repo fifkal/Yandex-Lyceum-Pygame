@@ -4,8 +4,10 @@ import pygame.camera
 
 pygame.init()
 pygame.camera.init()
-pygame.mixer.music.load('sound_effects/sword_sound (mp3cut.net) (2).mp3')
-ON_SIGHT = pygame.mixer.Sound('sound_effects/Kanye_West_-_On_Sight_47958363.mp3')
+
+sword_sound = pygame.mixer.Sound('sound_effects/sword_sound (mp3cut.net) (2).mp3')
+ON_SIGHT = pygame.mixer.Sound('sound_effects/16-Bit Starter Pack/Overworld/Long Road Ahead.ogg')
+jump_sound = pygame.mixer.Sound('sound_effects/free-sound-1674743518 (mp3cut.net).mp3')
 
 pygame.init()
 size = width, height = 800, 800
@@ -63,12 +65,14 @@ jump = 20
 air = False
 attack = False
 sound_sword = False
+sound_jump = False
 death = -1
 last_direction = 'RIGHT'
 fone = pygame.image.load('fone_images/fone.png', )
 camera = pygame.Rect(0, 0, 10, 140)
 
 motion = False
+ON_SIGHT.play()
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -173,7 +177,8 @@ while running:
     player_sprite.draw(screen)
     pygame.display.flip()
     all_keys = pygame.key.get_pressed()
-
+    if sound_sword:
+        sword_sound.play()
     if all_keys[pygame.K_SPACE] and not is_jump:
         x, y = player.rect.x, player.rect.y
         player_sprite.remove(player)
@@ -183,6 +188,9 @@ while running:
         is_jump = True
     # создание гравитации
     if is_jump:
+        if not sound_jump:
+            jump_sound.play()
+            sound_jump = True
         player.rect.y -= jump
         jump -= 5
         if jump <= -20:
@@ -190,6 +198,7 @@ while running:
             jump = 20
             player.rect.y += 20
             air = True
+            sound_jump = False
     # переход на другую анимацию при приземлении персонажа
     if air and not all_keys[pygame.K_d] and not all_keys[pygame.K_a]:
         x, y = player.rect.x, player.rect.y
