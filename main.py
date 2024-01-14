@@ -193,9 +193,6 @@ while running:
     screen.blit(fone, (-camera.x, -camera.y))
     player_sprite.update()
     player_sprite.draw(screen)
-    pos = pygame.mouse.get_pos()
-    if pygame.mouse.get_focused():
-        screen.blit(cursor1, (pos[0], pos[1]))
     pygame.display.update()
     pygame.display.flip()
     all_keys = pygame.key.get_pressed()
