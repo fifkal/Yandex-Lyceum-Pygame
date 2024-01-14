@@ -122,6 +122,7 @@ while running:
                 x, y = player.rect.x, player.rect.y
                 player_sprite.remove(player)
                 player = AnimatedSprite(load_image('Idle.png'), 5, 1, x, y)
+                sound_sword = False
             if pygame.mouse.get_pressed()[0] and all_keys[pygame.K_a]:
                 x, y = player.rect.x, player.rect.y
                 player_sprite.remove(player)
@@ -212,6 +213,7 @@ while running:
         if not sound_jump:
             jump_sound.play()
             sound_jump = True
+            sound_sword = False
         player.rect.y -= jump
         jump -= 5
         if jump <= -20:
