@@ -21,9 +21,10 @@ class Button:
         if sound_path:
             self.sound = pygame.mixer.Sound(sound_path)
         self.is_hovered = False
+        self.hov_check = True if self.hover_image else False
 
     def draw(self, screen):
-        current_image = self.hover_image if self.is_hovered else self.image
+        current_image = self.hover_image if self.is_hovered and self.hov_check else self.image
         screen.blit(current_image, self.rect.topleft)
 
         font = pygame.font.Font(None, 36)
@@ -39,3 +40,8 @@ class Button:
             if self.sound:
                 self.sound.play()
             pygame.event.post(pygame.event.Event(pygame.USEREVENT, button=self))
+
+    def move_slider(self, pos):
+        self.rect.centerx = pos[0] if self.x + 30 < pos[0] < self.x + self.width - 25 else (
+            self.rect.centerx)
+
