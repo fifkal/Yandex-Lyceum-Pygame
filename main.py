@@ -18,7 +18,7 @@ cursor1 = pygame.image.load('Ai_Cursor_Open.png')
 
 
 def load_image(name, color_key=None):  # загрузка изображений
-    fullname = os.path.join('Enchantress', name)
+    fullname = os.path.join('', name)
     try:
         image = pygame.image.load(fullname)
     except pygame.error as message:
@@ -55,12 +55,10 @@ class AnimatedSprite(pygame.sprite.Sprite):  # создание спрайтов
         self.cur_frame = (self.cur_frame + 1) % len(self.frames)
         self.image = self.frames[self.cur_frame]
 
-    def rotate(self, angle):
-        self.image = pygame.transform.rotate(self.image, angle)
-
 
 clock = pygame.time.Clock()
-player = AnimatedSprite(load_image('Idle.png'), 5, 1, 100, 550)
+player = AnimatedSprite(load_image('Enchantress/Idle.png'), 5, 1, 100, 550)
+enemy = AnimatedSprite(load_image('Skeleton/Idle.png'), 7, 1, 300, 550)
 running = True
 is_jump = False
 jump = 20
@@ -74,7 +72,6 @@ fone = pygame.image.load('fone_images/fone.png', )
 camera = pygame.Rect(0, 0, 10, 140)
 
 motion = False
-ON_SIGHT.play(-1)
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -85,80 +82,80 @@ while running:
             if all_keys[pygame.K_SPACE] and not all_keys[pygame.K_d] and not all_keys[pygame.K_a]:
                 x, y = player.rect.x, player.rect.y
                 player_sprite.remove(player)
-                player = AnimatedSprite(load_image('Jump.png'), 8, 1, x, y)
+                player = AnimatedSprite(load_image('Enchantress/Jump.png'), 8, 1, x, y)
                 is_jump = True
             if all_keys[pygame.K_d] and all_keys[pygame.K_a]:
                 x, y = player.rect.x, player.rect.y
                 player_sprite.remove(player)
-                player = AnimatedSprite(load_image('Hurt.png'), 2, 1, x, y)
+                player = AnimatedSprite(load_image('Enchantress/Hurt.png'), 2, 1, x, y)
             if pygame.mouse.get_pressed()[0] and all_keys[pygame.K_a]:
                 x, y = player.rect.x, player.rect.y
                 player_sprite.remove(player)
-                player = AnimatedSprite(load_image('Attack_2_left.png'), 3, 1, x, y)
+                player = AnimatedSprite(load_image('Enchantress/Attack_2_left.png'), 3, 1, x, y)
             elif pygame.mouse.get_pressed()[0] and all_keys[pygame.K_d]:
                 x, y = player.rect.x, player.rect.y
                 player_sprite.remove(player)
-                player = AnimatedSprite(load_image('Attack_2.png'), 3, 1, x, y)
+                player = AnimatedSprite(load_image('Enchantress/Attack_2.png'), 3, 1, x, y)
             elif all_keys[pygame.K_d] and not all_keys[pygame.K_a] and not all_keys[pygame.K_LSHIFT] and not is_jump:
                 x, y = player.rect.x, player.rect.y
                 player_sprite.remove(player)
-                player = AnimatedSprite(load_image('Walk.png'), 8, 1, x, y)
+                player = AnimatedSprite(load_image('Enchantress/Walk.png'), 8, 1, x, y)
             elif all_keys[pygame.K_a] and not all_keys[pygame.K_d] and not all_keys[pygame.K_LSHIFT] and not is_jump:
                 x, y = player.rect.x, player.rect.y
                 player_sprite.remove(player)
-                player = AnimatedSprite(load_image('Walk_left.png'), 8, 1, x, y)
+                player = AnimatedSprite(load_image('Enchantress/Walk_left.png'), 8, 1, x, y)
             elif all_keys[pygame.K_a] and not all_keys[pygame.K_d] and all_keys[pygame.K_LSHIFT] and not is_jump:
                 x, y = player.rect.x, player.rect.y
                 player_sprite.remove(player)
-                player = AnimatedSprite(load_image('Run_left.png'), 8, 1, x, y)
+                player = AnimatedSprite(load_image('Enchantress/Run_left.png'), 8, 1, x, y)
             elif all_keys[pygame.K_d] and not all_keys[pygame.K_a] and all_keys[pygame.K_LSHIFT] and not is_jump:
                 x, y = player.rect.x, player.rect.y
                 player_sprite.remove(player)
-                player = AnimatedSprite(load_image('Run.png'), 8, 1, x, y)
+                player = AnimatedSprite(load_image('Enchantress/Run.png'), 8, 1, x, y)
         if event.type == pygame.KEYUP:
             # проверка отпускания клавиши на переход на другую подходящую анимацию
             all_keys = pygame.key.get_pressed()
             if not all_keys[pygame.K_d] and not all_keys[pygame.K_a] and not is_jump:
                 x, y = player.rect.x, player.rect.y
                 player_sprite.remove(player)
-                player = AnimatedSprite(load_image('Idle.png'), 5, 1, x, y)
+                player = AnimatedSprite(load_image('Enchantress/Idle.png'), 5, 1, x, y)
                 sound_sword = False
             if pygame.mouse.get_pressed()[0] and all_keys[pygame.K_a]:
                 x, y = player.rect.x, player.rect.y
                 player_sprite.remove(player)
-                player = AnimatedSprite(load_image('Attack_2_left.png'), 3, 1, x, y)
+                player = AnimatedSprite(load_image('Enchantress/Attack_2_left.png'), 3, 1, x, y)
             elif pygame.mouse.get_pressed()[0] and all_keys[pygame.K_d]:
                 x, y = player.rect.x, player.rect.y
                 player_sprite.remove(player)
-                player = AnimatedSprite(load_image('Attack_2.png'), 3, 1, x, y)
+                player = AnimatedSprite(load_image('Enchantress/Attack_2.png'), 3, 1, x, y)
             elif all_keys[pygame.K_d] and not all_keys[pygame.K_a] and not all_keys[pygame.K_LSHIFT] and not is_jump:
                 x, y = player.rect.x, player.rect.y
                 player_sprite.remove(player)
-                player = AnimatedSprite(load_image('Walk.png'), 8, 1, x, y)
+                player = AnimatedSprite(load_image('Enchantress/Walk.png'), 8, 1, x, y)
             elif all_keys[pygame.K_a] and not all_keys[pygame.K_d] and not all_keys[pygame.K_LSHIFT] and not is_jump:
                 x, y = player.rect.x, player.rect.y
                 player_sprite.remove(player)
-                player = AnimatedSprite(load_image('Walk_left.png'), 8, 1, x, y)
+                player = AnimatedSprite(load_image('Enchantress/Walk_left.png'), 8, 1, x, y)
             elif all_keys[pygame.K_a] and not all_keys[pygame.K_d] and all_keys[pygame.K_LSHIFT] and not is_jump:
                 x, y = player.rect.x, player.rect.y
                 player_sprite.remove(player)
-                player = AnimatedSprite(load_image('Run_left.png'), 8, 1, x, y)
+                player = AnimatedSprite(load_image('Enchantress/Run_left.png'), 8, 1, x, y)
             elif all_keys[pygame.K_d] and not all_keys[pygame.K_a] and all_keys[pygame.K_LSHIFT] and not is_jump:
                 x, y = player.rect.x, player.rect.y
                 player_sprite.remove(player)
-                player = AnimatedSprite(load_image('Run.png'), 8, 1, x, y)
+                player = AnimatedSprite(load_image('Enchantress/Run.png'), 8, 1, x, y)
         if event.type == pygame.MOUSEBUTTONDOWN:
             # то же самое, что и с клавишами, но уже для нажатия мыши (атака, будет ещё подобие некой ульты, но сделаю
             # потом
             if event.button == 1 and last_direction == 'RIGHT':
                 x, y = player.rect.x, player.rect.y
                 player_sprite.remove(player)
-                player = AnimatedSprite(load_image('Attack_2.png'), 3, 1, x, y)
+                player = AnimatedSprite(load_image('Enchantress/Attack_2.png'), 3, 1, x, y)
                 sound_sword = True
             elif event.button == 1 and last_direction == 'LEFT':
                 x, y = player.rect.x, player.rect.y
                 player_sprite.remove(player)
-                player = AnimatedSprite(load_image('Attack_2_left.png'), 3, 1, x, y)
+                player = AnimatedSprite(load_image('Enchantress/Attack_2_left.png'), 3, 1, x, y)
                 sound_sword = True
         if event.type == pygame.MOUSEBUTTONUP:
             sound_sword = False
@@ -166,27 +163,27 @@ while running:
             if all_keys[pygame.K_d] and all_keys[pygame.K_a]:
                 x, y = player.rect.x, player.rect.y
                 player_sprite.remove(player)
-                player = AnimatedSprite(load_image('Hurt.png'), 2, 1, x, y)
+                player = AnimatedSprite(load_image('Enchantress/Hurt.png'), 2, 1, x, y)
             if not all_keys[pygame.K_d] and not all_keys[pygame.K_a] and not is_jump:
                 x, y = player.rect.x, player.rect.y
                 player_sprite.remove(player)
-                player = AnimatedSprite(load_image('Idle.png'), 5, 1, x, y)
+                player = AnimatedSprite(load_image('Enchantress/Idle.png'), 5, 1, x, y)
             elif all_keys[pygame.K_d] and not all_keys[pygame.K_a] and not all_keys[pygame.K_LSHIFT] and not is_jump:
                 x, y = player.rect.x, player.rect.y
                 player_sprite.remove(player)
-                player = AnimatedSprite(load_image('Walk.png'), 8, 1, x, y)
+                player = AnimatedSprite(load_image('Enchantress/Walk.png'), 8, 1, x, y)
             elif all_keys[pygame.K_a] and not all_keys[pygame.K_d] and not all_keys[pygame.K_LSHIFT] and not is_jump:
                 x, y = player.rect.x, player.rect.y
                 player_sprite.remove(player)
-                player = AnimatedSprite(load_image('Walk_left.png'), 8, 1, x, y)
+                player = AnimatedSprite(load_image('Enchantress/Walk_left.png'), 8, 1, x, y)
             elif all_keys[pygame.K_a] and not all_keys[pygame.K_d] and all_keys[pygame.K_LSHIFT] and not is_jump:
                 x, y = player.rect.x, player.rect.y
                 player_sprite.remove(player)
-                player = AnimatedSprite(load_image('Run_left.png'), 8, 1, x, y)
+                player = AnimatedSprite(load_image('Enchantress/Run_left.png'), 8, 1, x, y)
             elif all_keys[pygame.K_d] and not all_keys[pygame.K_a] and all_keys[pygame.K_LSHIFT] and not is_jump:
                 x, y = player.rect.x, player.rect.y
                 player_sprite.remove(player)
-                player = AnimatedSprite(load_image('Run.png'), 8, 1, x, y)
+                player = AnimatedSprite(load_image('Enchantress/Run.png'), 8, 1, x, y)
 
     camera.x = player.rect.centerx - 150 / 2
     camera.y = player.rect.centery - 1227 / 2
@@ -203,7 +200,7 @@ while running:
         player_sprite.remove(player)
         camera.x = player.rect.centerx - 150 / 2
         camera.y = player.rect.centery - 1227 / 2
-        player = AnimatedSprite(load_image('Jump.png'), 8, 1, x, y)
+        player = AnimatedSprite(load_image('Enchantress/Jump.png'), 8, 1, x, y)
         is_jump = True
     # создание гравитации
     if is_jump:
@@ -223,37 +220,37 @@ while running:
     if air and not all_keys[pygame.K_d] and not all_keys[pygame.K_a]:
         x, y = player.rect.x, player.rect.y
         player_sprite.remove(player)
-        player = AnimatedSprite(load_image('Idle.png'), 5, 1, x, y)
+        player = AnimatedSprite(load_image('Enchantress/Idle.png'), 5, 1, x, y)
         air = False
 
     elif air and all_keys[pygame.K_d] and not all_keys[pygame.K_a] and not all_keys[pygame.K_LSHIFT]:
         x, y = player.rect.x, player.rect.y
         player_sprite.remove(player)
-        player = AnimatedSprite(load_image('Walk.png'), 8, 1, x, y)
+        player = AnimatedSprite(load_image('Enchantress/Walk.png'), 8, 1, x, y)
         air = False
 
     elif air and not all_keys[pygame.K_d] and all_keys[pygame.K_a] and not all_keys[pygame.K_LSHIFT]:
         x, y = player.rect.x, player.rect.y
         player_sprite.remove(player)
-        player = AnimatedSprite(load_image('Walk_left.png'), 8, 1, x, y)
+        player = AnimatedSprite(load_image('Enchantress/Walk_left.png'), 8, 1, x, y)
         air = False
 
     elif air and all_keys[pygame.K_d] and not all_keys[pygame.K_a] and all_keys[pygame.K_LSHIFT]:
         x, y = player.rect.x, player.rect.y
         player_sprite.remove(player)
-        player = AnimatedSprite(load_image('Run.png'), 8, 1, x, y)
+        player = AnimatedSprite(load_image('Enchantress/Run.png'), 8, 1, x, y)
         air = False
 
     elif air and not all_keys[pygame.K_d] and all_keys[pygame.K_a] and all_keys[pygame.K_LSHIFT]:
         x, y = player.rect.x, player.rect.y
         player_sprite.remove(player)
-        player = AnimatedSprite(load_image('Run_left.png'), 8, 1, x, y)
+        player = AnimatedSprite(load_image('Enchantress/Run_left.png'), 8, 1, x, y)
         air = False
 
     elif air and all_keys[pygame.K_d] and all_keys[pygame.K_a]:
         x, y = player.rect.x, player.rect.y
         player_sprite.remove(player)
-        player = AnimatedSprite(load_image('Hurt.png'), 2, 1, x, y)
+        player = AnimatedSprite(load_image('Enchantress/Hurt.png'), 2, 1, x, y)
         air = False
 
     # перемещение персонажа
