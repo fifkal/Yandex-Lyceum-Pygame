@@ -18,7 +18,7 @@ cursor1 = pygame.image.load('Ai_Cursor_Open.png')
 
 
 def load_image(name, color_key=None):  # загрузка изображений
-    fullname = os.path.join('', name)
+    fullname = os.path.join('player_sprites', name)
     try:
         image = pygame.image.load(fullname)
     except pygame.error as message:
@@ -187,7 +187,7 @@ while running:
 
     camera.x = player.rect.centerx - 150 / 2
     camera.y = player.rect.centery - 1227 / 2
-    screen.blit(fone, (-camera.x, -camera.y))
+    screen.blit(fone, (0, 0))
     player_sprite.update()
     player_sprite.draw(screen)
     pygame.display.update()
