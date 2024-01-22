@@ -282,6 +282,45 @@ def customize():
         clock.tick(10)
 
 
+def levels():
+    swipper_button = Button(width / 2 - (252 / 2), 150, 74, 74, '',
+                            'buttons/Numbers/0.png')
+    return_button = Button(width / 2 - (252 / 2), 250, 252, 74, '',
+                           'buttons/Back/Back1.png', 'buttons/Back/Back4.png')
+    slider = Button(width / 2 - (252 / 2), 150, 252, 74, '',
+                    'buttons/Volume/Swiper/Swiper2.png')
+
+    running = True
+    sound = False
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.USEREVENT and event.button == return_button:
+                click.play()
+                main_menu()
+            if event.type == pygame.USEREVENT and event.button == swipper_button:
+                sound = True
+            if event.type == pygame.MOUSEBUTTONUP:
+                sound = False
+            for btn in [swipper_button, return_button, slider]:
+                btn.handle_event(event)
+                btn.check_hover(pygame.mouse.get_pos())
+        screen.blit(volume_fone, (0, 0))
+        font = pygame.font.Font('Pixelfraktur.ttf', 72)
+        text_surface = font.render('Cloudborn', True, (255, 255, 255))
+        text_rect = text_surface.get_rect(center=(width / 2, 100))
+        screen.blit(text_surface, text_rect)
+        if sound:
+            slider.move_slider(pygame.mouse.get_pos())
+        for btn in [swipper_button, return_button, slider]:
+            btn.draw(screen)
+        song.set_volume((slider.rect.centerx - (width / 2 - (252 / 2))) / swipper_button.width)
+        pygame.display.flip()
+
+
 if __name__ == '__main__':
     song.play(-1)
     main_menu()

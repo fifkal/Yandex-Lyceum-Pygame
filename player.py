@@ -155,8 +155,11 @@ class Platform(pygame.sprite.Sprite):
 
 running = True
 is_jump = False
-returna = False
-jump = 42
+air = False
+jump = 50
+y_ground = 550
+last_jump = 0
+plat_check = False
 ret = 0
 now_step = 0
 platform = Platform(400, 630, 50, 50)
@@ -184,11 +187,11 @@ while running:
     player.nova_move()
     if is_jump:
         player.rect.y -= jump
-        jump -= 7
-        if jump <= -42:
+        jump -= 10
+        if player.rect.y >= y_ground:
             is_jump = False
-            jump = 42
-            player.rect.y += 42
+            air = True
+            jump = 50
             player.last_y = player.rect.y
     all_keys = pygame.key.get_pressed()
     if all_keys[pygame.K_SPACE] and not is_jump:
@@ -236,4 +239,4 @@ while running:
     enemy.updatee()
     pygame.display.flip()
 
-    clock.tick(15)
+    clock.tick(20)
