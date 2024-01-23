@@ -34,7 +34,7 @@ def load_image(name, color_key=None):  # загрузка изображений
         raise SystemExit(message)
     image = image.convert_alpha()
     if color_key is not None:
-        if color_key is -1:
+        if color_key == -1:
             color_key = image.get_at((0, 0))
         image.set_colorkey(color_key)
     return image
@@ -91,7 +91,6 @@ def main_menu():
                 click.play()
                 setting_menu()
             if event.type == pygame.USEREVENT and event.button == start_button:
-                click.play()
                 pygame.quit()
                 runpy.run_path(path_name='player.py')
                 sys.exit()
@@ -321,6 +320,6 @@ def levels():
         pygame.display.flip()
 
 
-if __name__ == '__main__':
-    song.play(-1)
-    main_menu()
+
+song.play(-1)
+main_menu()
