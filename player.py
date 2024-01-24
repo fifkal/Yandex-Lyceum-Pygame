@@ -118,6 +118,7 @@ class Player(AnimatedSprite):
         self.last_direction = 'right'
         self.change = False
         self.attack = False
+        self.cld = False
 
     def control(self, x, y):
         self.movex = x
@@ -142,16 +143,26 @@ class Player(AnimatedSprite):
             self.now_move = 'run_left'
         elif self.rect.x == self.last_x + 20:
             self.now_move = 'run'
-        elif self.rect.x == self.last_x and self.rect.y == self.last_y and not self.rct.colliderect(enemy.rct):
+        elif self.rect.x == self.last_x and self.rect.y == self.last_y: # and not self.rct.colliderect(enemy.rct):
             self.now_move = 'idle'
-        elif (self.rct.colliderect(enemy.rct) and
-              self.rect.x == self.last_x and self.rect.y == self.last_y):
-            self.now_move = 'hurt'
-            self.health -= 0.25
+        #elif (self.rct.colliderect(enemy.rct) and
+              #self.rect.x == self.last_x and self.rect.y == self.last_y):
+            #self.now_move = 'hurt'
+            #self.health -= 0.25
 
     def check(self):
         if self.last_move != self.now_move:
             self.change = True
+
+    def collid(self):
+        global is_jump, jump
+        flag = False
+        for p in platforms:
+            if self.rect.colliderect(p.rect) and is_jump and jump < 0:
+                is_jump = False
+                jump = -jump
+                self.now_move = 'idle'
+                self.cld = True
 
 
 class Camera(object):
@@ -211,8 +222,8 @@ class Enemy(AnimatedSprite):
         elif (player.rct.colliderect(self.rct) and player.rect.x <= self.rect.x and
                 player.now_move not in ['attack', 'attack_left']):
             self.now_move = 'attack_left'
-        elif self.rct.colliderect(enemy.rct) and player.now_move in ['attack', 'attack_left']:
-            self.now_move = 'hurt'
+        #elif self.rct.colliderect(enemy.rct) and player.now_move in ['attack', 'attack_left']:
+            #self.now_move = 'hurt'
         self.rct = pygame.Rect(self.rect.x + 30, self.rect.y + 55, self.rect.w - 60, self.rect.h - 50)
 
     def check(self):
@@ -228,21 +239,22 @@ class Platform(pygame.sprite.Sprite):
         super().__init__(platforms)
         self.image = load_image('box.png')
         self.image = pygame.transform.scale(self.image, (width, height))
-        self.rect = pygame.Rect(x1, y1, 50, 50)
+        self.rect = pygame.Rect(x1, y1, width, height)
 
 
 running = True
 is_jump = False
 air = False
-jump = 50
+jump = 10
+gravitation = 0.35
 y_ground = 550
 last_jump = 0
 plat_check = False
 ret = 0
 now_step = 0
-platform = Platform(400, 630, 50, 50)
+platform = Platform(400, 630, 100, 50)
 player = Player(load_image('Enchantress/Idle.png'), 5, 1, 300, 550, 'idle')
-enemy = Enemy(load_image('Skeleton/Idle.png'), 7, 1, 100, 550, 'idle')
+# enemy = Enemy(load_image('Skeleton/Idle.png'), 7, 1, 100, 550, 'idle')
 moves = {'idle': (load_image('Enchantress/Idle.png'), 5), 'step': (load_image('Enchantress/Walk.png'), 8),
          'step_left': (load_image('Enchantress/Walk_left.png'), 8), 'run': (load_image('Enchantress/Run.png'), 8),
          'run_left': (load_image('Enchantress/Run_left.png'), 8), 'jump': (load_image('Enchantress/Jump.png'), 8),
@@ -277,15 +289,15 @@ while running:
         if event.type == pygame.MOUSEBUTTONUP and not pause:
             player.attack = False
     if not pause:
-        player.nova_move()
         if is_jump:
             player.rect.y -= jump
-            jump -= 10
             if player.rect.y >= y_ground:
                 is_jump = False
-                air = True
-                jump = 50
+                air = False
+                jump = 10
                 player.last_y = player.rect.y
+            else:
+                jump -= gravitation
         all_keys = pygame.key.get_pressed()
         if all_keys[pygame.K_SPACE] and not is_jump:
             is_jump = True
@@ -311,14 +323,18 @@ while running:
         screen.blit(fone, (0, 0))
         rct = pygame.Rect(player.rect.x + 30, player.rect.y + 25, player.rect.w - 60, player.rect.h - 15)
         player.update_frame()
-        enemy.update_frame()
-        player.control(now_step, 0)
+        #enemy.update_frame()
+        player.control(now_step, player.movey)
         player.nova_move()
+        player.collid()
         player.check()
-        enemy.check()
+        #enemy.check()
         player_sprite.draw(screen)
         platforms.draw(screen)
         camera.update(player)
+        pygame.draw.rect(screen, pygame.Color('red'), player.rct, 5)
+        pygame.draw.rect(screen, pygame.Color('red'), platform.rect, 5)
+
         if player.change:
             now = player.now_move
             x, y = player.rect.x, player.rect.y
@@ -328,12 +344,12 @@ while running:
             player = Player(moves[now][0], moves[now][1], 1, x, y, now)
             player.last_direction = nd
             player.health = lh
-        if enemy.change:
-            now = enemy.now_move
-            x, y = enemy.rect.x, enemy.rect.y
-            player_sprite.remove(enemy)
-            enemy = Enemy(moves_enemy[now][0], moves_enemy[now][1], 1, x, y, now)
-        enemy.updatee()
+        #if enemy.change:
+            #now = enemy.now_move
+            #x, y = enemy.rect.x, enemy.rect.y
+            #player_sprite.remove(enemy)
+            #enemy = Enemy(moves_enemy[now][0], moves_enemy[now][1], 1, x, y, now)
+        #enemy.updatee()
         pygame.display.flip()
         clock.tick(20)
     else:
