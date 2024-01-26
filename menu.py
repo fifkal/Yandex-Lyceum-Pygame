@@ -9,6 +9,7 @@ cursor1 = pygame.image.load('Ai_Cursor_Open.png')
 pygame.init()
 
 width, height = 960, 600
+lt = 0
 
 screen = pygame.display.set_mode((width, height))
 clock = pygame.time.Clock()
@@ -66,10 +67,31 @@ class AnimatedSprite(pygame.sprite.Sprite):  # создание спрайтов
 
 
 player = AnimatedSprite(load_image('Enchantress/Idle.png'), 5, 1, 415, 210)
+players = [{'idle': (load_image('Enchantress/Idle.png'), 5), 'step': (load_image('Enchantress/Walk.png'), 8),
+             'step_left': (load_image('Enchantress/Walk_left.png'), 8), 'run': (load_image('Enchantress/Run.png'), 8),
+             'run_left': (load_image('Enchantress/Run_left.png'), 8), 'jump': (load_image('Enchantress/Jump.png'), 8),
+             'attack': (load_image('Enchantress/Attack_2.png'), 3),
+             'attack_left': (load_image('Enchantress/Attack_2_left.png'), 3),
+             'hurt': (load_image('Enchantress/Hurt.png'), 2)},
+           {'idle': (load_image('Knight/Idle.png'), 6), 'step': (load_image('Knight/Walk.png'), 8),
+            'step_left': (load_image('Knight/Walk_left.png'), 8), 'run': (load_image('Knight/Run.png'), 7),
+            'run_left': (load_image('Knight/Run_left.png'), 7), 'jump': (load_image('Knight/Jump.png'), 6),
+            'attack': (load_image('Knight/Attack_2.png'), 2),
+            'attack_left': (load_image('Knight/Attack_2_left.png'), 2),
+            'hurt': (load_image('Knight/Hurt.png'), 3)},
+           {'idle': (load_image('Musketeer/Idle.png'), 5), 'step': (load_image('Musketeer/Walk.png'), 8),
+            'step_left': (load_image('Musketeer/Walk_left.png'), 8), 'run': (load_image('Musketeer/Run.png'), 8),
+            'run_left': (load_image('Musketeer/Run_left.png'), 8), 'jump': (load_image('Musketeer/Jump.png'), 7),
+            'attack': (load_image('Musketeer/Attack_2.png'), 4),
+            'attack_left': (load_image('Musketeer/Attack_2_left.png'), 4),
+            'hurt': (load_image('Musketeer/Hurt.png'), 2)}
+           ]
+last_cnt = 0
 cnt = 0
 
 
 def main_menu():
+    global lt
     start_button = Button(width / 2 - (252 / 2), 150, 252, 74, '',
                           'buttons/Start/Start1.png', 'buttons/Start/Start4.png')
     settings_button = Button(width / 2 - (252 / 2), 250, 252, 74, '',
@@ -91,6 +113,8 @@ def main_menu():
                 click.play()
                 setting_menu()
             if event.type == pygame.USEREVENT and event.button == start_button:
+                lt += 1
+                print(1)
                 pygame.quit()
                 runpy.run_path(path_name='player.py')
                 sys.exit()
@@ -229,8 +253,7 @@ def volume_menu():
 
 
 def customize():
-    global cnt, player, player_sprite
-    last_cnt = 0
+    global cnt, player, player_sprite, last_cnt
     swipper_button = Button(200, 250, 100, 100, '',
                             'buttons/LeftKey/LeftKey1.png', 'buttons/LeftKey/LeftKey4.png')
     swipper1_button = Button(660, 250, 100, 100, '',

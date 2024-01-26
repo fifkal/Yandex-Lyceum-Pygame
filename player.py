@@ -3,8 +3,8 @@ import os
 import sys
 import pygame.gfxdraw
 from button import Button
+from menu import players, cnt
 import runpy
-
 
 player_sprite = pygame.sprite.Group()
 enemy_sprite = pygame.sprite.Group()
@@ -103,13 +103,12 @@ class AnimatedSprite(pygame.sprite.Sprite):  # создание спрайтов
 
 
 class Player(AnimatedSprite):
-    def __init__(self, sheet, columns, rows, x, y, now_move):
+    def __init__(self, sheet, columns, rows, x, y, now_move, on_platfrom):
         AnimatedSprite.__init__(self, sheet, columns, rows, x, y)
         self.rct = pygame.Rect(self.rect.x + 30, self.rect.y + 55, self.rect.w - 60, self.rect.h - 50)
         self.sheet = sheet
         self.movex = 0
         self.movey = 0
-        self.frame = 0
         self.health = 100
         self.last_x = self.rect.x
         self.last_y = self.rect.y
@@ -118,13 +117,18 @@ class Player(AnimatedSprite):
         self.last_direction = 'right'
         self.change = False
         self.attack = False
-        self.cld = False
+        self.on_platform = on_platfrom
 
     def control(self, x, y):
         self.movex = x
         self.movey = y
         self.last_x = self.rect.x
         self.rect.x += self.movex
+        for p in platforms:
+            if (p.rect.colliderect(self.rct) and not is_jump and not self.on_platform
+                    and ((self.last_direction == 'right' and self.rct.x < p.rect.x) or
+                         (self.last_direction == 'left' and self.rct.x > p.rect.x))):
+                self.rect.x = self.last_x
         self.rct = pygame.Rect(self.rect.x + 30, self.rect.y + 55, self.rect.w - 60, self.rect.h - 50)
 
     def nova_move(self):
@@ -143,12 +147,14 @@ class Player(AnimatedSprite):
             self.now_move = 'run_left'
         elif self.rect.x == self.last_x + 20:
             self.now_move = 'run'
-        elif self.rect.x == self.last_x and self.rect.y == self.last_y: # and not self.rct.colliderect(enemy.rct):
+        elif self.rect.x == self.last_x and self.rect.y == self.last_y and enemy.now_move not in \
+                ['attack', 'attack_left']:
             self.now_move = 'idle'
-        #elif (self.rct.colliderect(enemy.rct) and
-              #self.rect.x == self.last_x and self.rect.y == self.last_y):
-            #self.now_move = 'hurt'
-            #self.health -= 0.25
+        elif ((self.rct.colliderect(enemy.rct) and
+              self.rect.x == self.last_x and self.rect.y == self.last_y) and enemy.now_move in
+              ['attack', 'attack_left']):
+            self.now_move = 'hurt'
+            self.health -= 0.25
 
     def check(self):
         if self.last_move != self.now_move:
@@ -158,11 +164,25 @@ class Player(AnimatedSprite):
         global is_jump, jump
         flag = False
         for p in platforms:
-            if self.rect.colliderect(p.rect) and is_jump and jump < 0:
+            if self.rct.colliderect(p.rect):
+                flag = True
+            if ((self.rct.colliderect(p.rect) and is_jump and jump < 0 and self.rct.y < p.rect.y and
+                 not self.on_platform)
+                    or (self.rct.colliderect(p.rect) and self.on_platform and not is_jump)):
+                if not self.on_platform:
+                    self.change = True
                 is_jump = False
-                jump = -jump
-                self.now_move = 'idle'
-                self.cld = True
+                self.on_platform = True
+                self.rct.y = p.rect.y - p.rect.h
+                break
+            elif self.rct.colliderect(p.rect) and is_jump and jump < 0 and self.rct.y < p.rect.y and self.on_platform:
+                is_jump = True
+                jump = 30
+                self.on_platform = False
+                break
+        if not flag and self.on_platform:
+            is_jump = True
+            self.on_platform = False
 
 
 class Camera(object):
@@ -197,7 +217,6 @@ class Enemy(AnimatedSprite):
         self.sheet = sheet
         self.movex = 0
         self.movey = 0
-        self.frame = 0
         self.health = 10
         self.last_x = self.rect.x
         self.last_y = self.rect.y
@@ -208,6 +227,8 @@ class Enemy(AnimatedSprite):
         self.attack = False
 
     def updatee(self):
+        global platform
+        self.last_x = self.rect.x
         if player.rect.x < self.rect.x and not player.rct.colliderect(self.rct):
             self.last_direction = 'left'
             self.now_move = 'walk_left'
@@ -217,13 +238,17 @@ class Enemy(AnimatedSprite):
             self.now_move = 'walk'
             self.rect.x += 5
         elif (player.rct.colliderect(self.rct) and player.rect.x >= self.rect.x and
-                player.now_move not in ['attack', 'attack_left']):
+                player.now_move not in ['attack', 'attack_left'] and player.rect.y >= self.rect.y):
             self.now_move = 'attack'
         elif (player.rct.colliderect(self.rct) and player.rect.x <= self.rect.x and
-                player.now_move not in ['attack', 'attack_left']):
+                player.now_move not in ['attack', 'attack_left'] and player.rect.y >= self.rect.y):
             self.now_move = 'attack_left'
-        #elif self.rct.colliderect(enemy.rct) and player.now_move in ['attack', 'attack_left']:
-            #self.now_move = 'hurt'
+        elif self.rct.colliderect(enemy.rct) and player.now_move in ['attack', 'attack_left']:
+            self.now_move = 'hurt'
+        for p in platforms:
+            if p.rect.colliderect(self.rct) and ((self.last_direction == 'right' and self.rct.x < p.rect.x) or
+                                                 (self.last_direction == 'left' and self.rct.x > p.rect.x)):
+                self.rect.x = self.last_x
         self.rct = pygame.Rect(self.rect.x + 30, self.rect.y + 55, self.rect.w - 60, self.rect.h - 50)
 
     def check(self):
@@ -238,34 +263,27 @@ class Platform(pygame.sprite.Sprite):
     def __init__(self, x1, y1, width, height):
         super().__init__(platforms)
         self.image = load_image('box.png')
-        self.image = pygame.transform.scale(self.image, (width, height))
-        self.rect = pygame.Rect(x1, y1, width, height)
+        self.image = pygame.transform.scale(self.image, (width + 12, height + 12))
+        self.rect = pygame.Rect(x1, y1, width + 12, height)
 
 
 running = True
 is_jump = False
-air = False
-jump = 10
-gravitation = 0.35
+jump = 30
+gravitation = 5
 y_ground = 550
-last_jump = 0
-plat_check = False
-ret = 0
-now_step = 0
-platform = Platform(400, 630, 100, 50)
-player = Player(load_image('Enchantress/Idle.png'), 5, 1, 300, 550, 'idle')
-# enemy = Enemy(load_image('Skeleton/Idle.png'), 7, 1, 100, 550, 'idle')
-moves = {'idle': (load_image('Enchantress/Idle.png'), 5), 'step': (load_image('Enchantress/Walk.png'), 8),
-         'step_left': (load_image('Enchantress/Walk_left.png'), 8), 'run': (load_image('Enchantress/Run.png'), 8),
-         'run_left': (load_image('Enchantress/Run_left.png'), 8), 'jump': (load_image('Enchantress/Jump.png'), 8),
-         'attack': (load_image('Enchantress/Attack_2.png'), 3),
-         'attack_left': (load_image('Enchantress/Attack_2_left.png'), 3),
-         'hurt': (load_image('Enchantress/Hurt.png'), 2)}
+
+enemy = Enemy(load_image('Skeleton/Idle.png'), 7, 1, 400, 550, 'idle')
+platform = Platform(500, 600, 50, 50)
+platform1 = Platform(100, 600, 50, 50)
+
+moves = players[cnt % 3]
 moves_enemy = {'idle': (load_image('Skeleton/Idle.png'), 7), 'walk': (load_image('Skeleton/Walk.png'), 8),
                'walk_left': (load_image('Skeleton/Walk_left.png'), 8),
                'attack': (load_image('Skeleton/Attack_2.png'), 4),
                'attack_left': (load_image('Skeleton/Attack_2_left.png'), 4),
                'hurt': (load_image('Skeleton/Hurt.png'), 3)}
+player = Player(moves['idle'][0], moves['idle'][1], 1, 600, 550, 'idle', False)
 pause = False
 total_level_width = 400  # Высчитываем фактическую ширину уровня
 total_level_height = 400  # высоту
@@ -293,8 +311,7 @@ while running:
             player.rect.y -= jump
             if player.rect.y >= y_ground:
                 is_jump = False
-                air = False
-                jump = 10
+                jump = 30
                 player.last_y = player.rect.y
             else:
                 jump -= gravitation
@@ -321,35 +338,33 @@ while running:
               (not all_keys[pygame.K_d])):
             now_step = 0
         screen.blit(fone, (0, 0))
-        rct = pygame.Rect(player.rect.x + 30, player.rect.y + 25, player.rect.w - 60, player.rect.h - 15)
         player.update_frame()
-        #enemy.update_frame()
-        player.control(now_step, player.movey)
-        player.nova_move()
+        enemy.update_frame()
+        player.control(now_step, 0)
         player.collid()
+        player.nova_move()
         player.check()
-        #enemy.check()
+        enemy.check()
         player_sprite.draw(screen)
         platforms.draw(screen)
         camera.update(player)
-        pygame.draw.rect(screen, pygame.Color('red'), player.rct, 5)
-        pygame.draw.rect(screen, pygame.Color('red'), platform.rect, 5)
 
         if player.change:
+            np = player.on_platform
             now = player.now_move
             x, y = player.rect.x, player.rect.y
             nd = player.last_direction
             lh = player.health
             player_sprite.remove(player)
-            player = Player(moves[now][0], moves[now][1], 1, x, y, now)
+            player = Player(moves[now][0], moves[now][1], 1, x, y, now, np)
             player.last_direction = nd
             player.health = lh
-        #if enemy.change:
-            #now = enemy.now_move
-            #x, y = enemy.rect.x, enemy.rect.y
-            #player_sprite.remove(enemy)
-            #enemy = Enemy(moves_enemy[now][0], moves_enemy[now][1], 1, x, y, now)
-        #enemy.updatee()
+        if enemy.change:
+            now = enemy.now_move
+            x, y = enemy.rect.x, enemy.rect.y
+            player_sprite.remove(enemy)
+            enemy = Enemy(moves_enemy[now][0], moves_enemy[now][1], 1, x, y, now)
+        enemy.updatee()
         pygame.display.flip()
         clock.tick(20)
     else:

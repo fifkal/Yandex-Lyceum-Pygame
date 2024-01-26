@@ -272,7 +272,7 @@ while running:
     elif player.rect.x > 666:
         player.rect.x = 666
 
-    clock.tick(15)
+    clock.tick(30)
 
 pygame.quit()
 
