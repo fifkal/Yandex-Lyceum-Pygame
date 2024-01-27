@@ -48,9 +48,11 @@ def pause_menu():
     while running1:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running1 = False
                 pygame.quit()
-                sys.exit()
+                try:
+                    sys.exit()
+                finally:
+                    main = False
             if event.type == pygame.USEREVENT and event.button == start_button:
                 running1 = False
                 pause = False
@@ -59,7 +61,7 @@ def pause_menu():
                 pause = False
             if event.type == pygame.USEREVENT and event.button == exit_button:
                 pygame.quit()
-                runpy.run_path(path_name='menu.py')
+                runpy.run_module(mod_name="menu")
                 sys.exit()
             for btn in [start_button, settings_button, exit_button]:
                 btn.handle_event(event)
@@ -246,8 +248,9 @@ class Enemy(AnimatedSprite):
         elif self.rct.colliderect(enemy.rct) and player.now_move in ['attack', 'attack_left']:
             self.now_move = 'hurt'
         for p in platforms:
-            if p.rect.colliderect(self.rct) and ((self.last_direction == 'right' and self.rct.x < p.rect.x) or
-                                                 (self.last_direction == 'left' and self.rct.x > p.rect.x)):
+            if p.rect.colliderect(self.rct) and ((self.last_direction == 'right' and self.rct.centerx <= p.rect.centerx)
+                                                 or
+                                                 (self.last_direction == 'left' and self.rct.centerx >= p.rect.centerx)):
                 self.rect.x = self.last_x
         self.rct = pygame.Rect(self.rect.x + 30, self.rect.y + 55, self.rect.w - 60, self.rect.h - 50)
 
@@ -283,7 +286,8 @@ moves_enemy = {'idle': (load_image('Skeleton/Idle.png'), 7), 'walk': (load_image
                'attack': (load_image('Skeleton/Attack_2.png'), 4),
                'attack_left': (load_image('Skeleton/Attack_2_left.png'), 4),
                'hurt': (load_image('Skeleton/Hurt.png'), 3)}
-player = Player(moves['idle'][0], moves['idle'][1], 1, 600, 550, 'idle', False)
+now = 'idle'
+player = Player(moves['idle'][0], moves['idle'][1], 1, 500, 550, 'idle', False)
 pause = False
 total_level_width = 400  # Высчитываем фактическую ширину уровня
 total_level_height = 400  # высоту

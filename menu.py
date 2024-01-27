@@ -1,10 +1,9 @@
 import pygame
 import sys
-import runpy
 import os
 from button import Button
+import runpy
 cursor1 = pygame.image.load('Ai_Cursor_Open.png')
-
 
 pygame.init()
 
@@ -113,10 +112,9 @@ def main_menu():
                 click.play()
                 setting_menu()
             if event.type == pygame.USEREVENT and event.button == start_button:
-                lt += 1
-                print(1)
                 pygame.quit()
-                runpy.run_path(path_name='player.py')
+                print(cnt)
+                runpy.run_module(mod_name="player")
                 sys.exit()
             if event.type == pygame.USEREVENT and event.button == exit_button:
                 click.play()
