@@ -3,7 +3,7 @@ import os
 import sys
 import pygame.gfxdraw
 from button import Button
-from menu import players, cnt
+from menu import players, cnt, now_level
 import runpy
 
 all_sprites = pygame.sprite.Group()
@@ -354,7 +354,7 @@ moves_enemy = {'idle': (load_image('Skeleton/Idle.png'), 7), 'walk': (load_image
                'attack': (load_image('Skeleton/Attack_2.png'), 4),
                'attack_left': (load_image('Skeleton/Attack_2_left.png'), 4),
                'hurt': (load_image('Skeleton/Hurt.png'), 3), 'death': (load_image('Skeleton/Dead.png'), 3)}
-level = [x for x in open('levels/level3')]
+level = now_level
 x = y = 0  # координаты
 score = 0
 for row in level:  # вся строка

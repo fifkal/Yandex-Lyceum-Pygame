@@ -88,6 +88,8 @@ players = [{'idle': (load_image('Enchantress/Idle.png'), 5), 'step': (load_image
             'attack_left': (load_image('Musketeer/Attack_2_left.png'), 4),
             'hurt': (load_image('Musketeer/Hurt.png'), 2)}
            ]
+levelss = [[x for x in open('levels/level1')], [x for x in open('levels/level2')], [x for x in open('levels/level3')]]
+now_level = []
 last_cnt = 0
 cnt = 0
 
@@ -304,6 +306,7 @@ def customize():
 
 
 def levels():
+    global levelss, now_level
     level_1 = Button(width / 2 - (252 / 2) - 40, 150, 74, 74, '',
                             'buttons/Numbers/1.png')
     level_2 = Button(width / 2 - 40, 150, 74, 74, '',
@@ -326,6 +329,19 @@ def levels():
                 click.play()
                 main_menu()
             if event.type == pygame.USEREVENT and event.button == level_1:
+                now_level = levelss[0]
+                click.play()
+                pygame.quit()
+                runpy.run_module(mod_name="player")
+                sys.exit()
+            if event.type == pygame.USEREVENT and event.button == level_2:
+                now_level = levelss[1]
+                click.play()
+                pygame.quit()
+                runpy.run_module(mod_name="player")
+                sys.exit()
+            if event.type == pygame.USEREVENT and event.button == level_3:
+                now_level = levelss[2]
                 click.play()
                 pygame.quit()
                 runpy.run_module(mod_name="player")
