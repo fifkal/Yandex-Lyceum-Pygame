@@ -6,7 +6,7 @@ from button import Button
 from menu import players, cnt
 import runpy
 
-player_sprite = pygame.sprite.Group()
+all_sprites = pygame.sprite.Group()
 enemy_sprite = pygame.sprite.Group()
 steps = 10
 pygame.init()
@@ -16,8 +16,10 @@ clock = pygame.time.Clock()
 fps = 10
 
 sword_sound = pygame.mixer.Sound('sound_effects/sword_sound (mp3cut.net) (2).mp3')
-ON_SIGHT = pygame.mixer.Sound('sound_effects/16-Bit Starter Pack/Overworld/Long Road Ahead.ogg')
+song = pygame.mixer.Sound('sound_effects/16-Bit Starter Pack/Overworld/Long Road Ahead.ogg')
+death_song = pygame.mixer.Sound('sound_effects/16-Bit Starter Pack/Towns/Remnants of What Once Was.ogg')
 jump_sound = pygame.mixer.Sound('sound_effects/free-sound-1674743518 (mp3cut.net).mp3')
+damage_sound = pygame.mixer.Sound('sound_effects/damage_sound (mp3cut.net).mp3')
 fone = pygame.image.load('fone_images/fone.png', )
 
 
@@ -40,8 +42,6 @@ def pause_menu():
     global pause, screen, running
     start_button = Button(width / 2 - (252 / 2), 150, 252, 74, '',
                           'buttons/Resume/Resume1.png', 'buttons/Resume/Resume4.png')
-    settings_button = Button(width / 2 - (252 / 2), 250, 252, 74, '',
-                             'buttons/Settings/Settings1.png', 'buttons/Settings/Settings4.png')
     exit_button = Button(width / 2 - (252 / 2), 350, 252, 74, '',
                          'buttons/Main Menu/Main Menu1.png', 'buttons/Main Menu/Main Menu4.png')
     running1 = True
@@ -63,25 +63,73 @@ def pause_menu():
                 pygame.quit()
                 runpy.run_module(mod_name="menu")
                 sys.exit()
-            for btn in [start_button, settings_button, exit_button]:
+            for btn in [start_button, exit_button]:
                 btn.handle_event(event)
                 btn.check_hover(pygame.mouse.get_pos())
         s = pygame.Surface((800, 800))  # the size of your rect
         s.set_alpha(3)  # alpha level
         s.fill((220, 220, 220))  # this fills the entire surface
         screen.blit(s, (0, 0))
+
         font = pygame.font.Font('Pixelfraktur.ttf', 72)
         text_surface = font.render('Cloudborn', True, (255, 255, 255))
         text_rect = text_surface.get_rect(center=(width / 2, 100))
         screen.blit(text_surface, text_rect)
-        for btn in [start_button, settings_button, exit_button]:
+
+        for btn in [start_button, exit_button]:
             btn.draw(screen)
+        pygame.display.flip()
+
+
+def death():
+    global pause, screen, running
+    song.stop()
+    death_song.play(-1)
+    exit_button = Button(width / 2 - (252 / 2), 350, 252, 74, '',
+                         'buttons/Main Menu/Main Menu1.png', 'buttons/Main Menu/Main Menu4.png')
+    running1 = True
+    while running1:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                try:
+                    sys.exit()
+                finally:
+                    main = False
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                running1 = False
+                pause = False
+            if event.type == pygame.USEREVENT and event.button == exit_button:
+                pygame.quit()
+                runpy.run_module(mod_name="menu")
+                sys.exit()
+            exit_button.handle_event(event)
+            exit_button.check_hover(pygame.mouse.get_pos())
+        s = pygame.Surface((800, 800))  # the size of your rect
+        s.set_alpha(3)  # alpha level
+        s.fill((220, 220, 220))  # this fills the entire surface
+        screen.blit(s, (0, 0))
+        font = pygame.font.Font('Pixelfraktur.ttf', 72)
+        text_surface = font.render('You died', True, (255, 255, 255))
+        text_rect = text_surface.get_rect(center=(width / 2, 100))
+
+        font1 = pygame.font.Font('Pixelfraktur.ttf', 72)
+        text_surface1 = font1.render('Your score:', True, (255, 255, 255))
+        text_rect1 = text_surface.get_rect(center=(width / 2 - 28, 200))
+        screen.blit(text_surface1, text_rect1)
+
+        font2 = pygame.font.Font('Pixelfraktur.ttf', 72)
+        text_surface2 = font2.render(str(score), True, (255, 255, 255))
+        text_rect2 = text_surface.get_rect(center=(width - 275, 300))
+        screen.blit(text_surface2, text_rect2)
+        screen.blit(text_surface, text_rect)
+        exit_button.draw(screen)
         pygame.display.flip()
 
 
 class AnimatedSprite(pygame.sprite.Sprite):  # создание спрайтов
     def __init__(self, sheet, columns, rows, x, y):
-        super().__init__(player_sprite)
+        super().__init__(all_sprites)
         self.sheet = sheet
         self.frames = []
         self.cut_sheet(self.sheet, columns, rows)
@@ -131,6 +179,9 @@ class Player(AnimatedSprite):
                     and ((self.last_direction == 'right' and self.rct.x < p.rect.x) or
                          (self.last_direction == 'left' and self.rct.x > p.rect.x))):
                 self.rect.x = self.last_x
+        if (self.rct.x <= 0 and self.last_direction == 'left') or (self.rct.centerx + 40 >= width and
+                                                                   self.last_direction == 'right'):
+            self.rect.x = self.last_x
         self.rct = pygame.Rect(self.rect.x + 30, self.rect.y + 55, self.rect.w - 60, self.rect.h - 50)
 
     def nova_move(self):
@@ -149,14 +200,20 @@ class Player(AnimatedSprite):
             self.now_move = 'run_left'
         elif self.rect.x == self.last_x + 20:
             self.now_move = 'run'
-        elif self.rect.x == self.last_x and self.rect.y == self.last_y and enemy.now_move not in \
-                ['attack', 'attack_left']:
+        else:
             self.now_move = 'idle'
-        elif ((self.rct.colliderect(enemy.rct) and
-              self.rect.x == self.last_x and self.rect.y == self.last_y) and enemy.now_move in
-              ['attack', 'attack_left']):
-            self.now_move = 'hurt'
-            self.health -= 0.25
+        for enemy in enemies:
+            if ((self.rct.colliderect(enemy.rct) and
+                self.rect.x == self.last_x and self.rect.y == self.last_y) and enemy.now_move in
+                    ['attack', 'attack_left']):
+                self.now_move = 'hurt'
+                self.health -= 0.5
+        if self.attack and self.last_direction == 'right':
+            self.now_move = 'attack'
+        elif self.attack and self.last_direction == 'left':
+            self.now_move = 'attack_left'
+        if self.health <= 0:
+            self.now_move = 'death'
 
     def check(self):
         if self.last_move != self.now_move:
@@ -219,7 +276,7 @@ class Enemy(AnimatedSprite):
         self.sheet = sheet
         self.movex = 0
         self.movey = 0
-        self.health = 10
+        self.health = 25
         self.last_x = self.rect.x
         self.last_y = self.rect.y
         self.now_move = now_move
@@ -245,12 +302,24 @@ class Enemy(AnimatedSprite):
         elif (player.rct.colliderect(self.rct) and player.rect.x <= self.rect.x and
                 player.now_move not in ['attack', 'attack_left'] and player.rect.y >= self.rect.y):
             self.now_move = 'attack_left'
-        elif self.rct.colliderect(enemy.rct) and player.now_move in ['attack', 'attack_left']:
+        elif player.rct.colliderect(enemy.rct) and player.now_move in ['attack', 'attack_left']:
             self.now_move = 'hurt'
+            self.health -= 0.5
+        else:
+            self.now_move = 'idle'
+        if self.health == 0:
+            self.now_move = 'death'
         for p in platforms:
             if p.rect.colliderect(self.rct) and ((self.last_direction == 'right' and self.rct.centerx <= p.rect.centerx)
                                                  or
                                                  (self.last_direction == 'left' and self.rct.centerx >= p.rect.centerx)):
+                self.rect.x = self.last_x
+        for p in enemies:
+            if p.rct.colliderect(self.rct) and p != self and ((self.last_direction == 'right'
+                                                               and self.rct.centerx <= p.rct.centerx)
+                                                              or
+                                                              (self.last_direction == 'left'
+                                                               and self.rct.centerx >= p.rct.centerx)):
                 self.rect.x = self.last_x
         self.rct = pygame.Rect(self.rect.x + 30, self.rect.y + 55, self.rect.w - 60, self.rect.h - 50)
 
@@ -277,22 +346,36 @@ gravitation = 5
 y_ground = 550
 
 enemy = Enemy(load_image('Skeleton/Idle.png'), 7, 1, 400, 550, 'idle')
-platform = Platform(500, 600, 50, 50)
-platform1 = Platform(100, 600, 50, 50)
+enemies = [enemy]
 
 moves = players[cnt % 3]
 moves_enemy = {'idle': (load_image('Skeleton/Idle.png'), 7), 'walk': (load_image('Skeleton/Walk.png'), 8),
                'walk_left': (load_image('Skeleton/Walk_left.png'), 8),
                'attack': (load_image('Skeleton/Attack_2.png'), 4),
                'attack_left': (load_image('Skeleton/Attack_2_left.png'), 4),
-               'hurt': (load_image('Skeleton/Hurt.png'), 3)}
+               'hurt': (load_image('Skeleton/Hurt.png'), 3), 'death': (load_image('Skeleton/Dead.png'), 3)}
+level = [x for x in open('levels/level1')]
+x = y = 0  # координаты
+score = 0
+for row in level:  # вся строка
+    for col in row:  # каждый символ
+        if col == "-":
+            # создаем блок, заливаем его цветом и рисеум его
+            pf = Platform(x, y, 50, 50)
+
+        x += 100  # блоки платформы ставятся на ширине блоков
+    y += 50  # то же самое и с высотой
+    x = 0
+
 now = 'idle'
 player = Player(moves['idle'][0], moves['idle'][1], 1, 500, 550, 'idle', False)
 pause = False
 total_level_width = 400  # Высчитываем фактическую ширину уровня
 total_level_height = 400  # высоту
-
+time = 1
+cnst = 200
 camera = Camera(camera_configure, total_level_width, total_level_height)
+song.play(-1)
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -304,6 +387,7 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 is_jump = True
+                jump_sound.play()
             if event.key == pygame.K_ESCAPE and not pause:
                 pause = True
             elif event.key == pygame.K_ESCAPE and pause:
@@ -320,10 +404,10 @@ while running:
             else:
                 jump -= gravitation
         all_keys = pygame.key.get_pressed()
-        if all_keys[pygame.K_SPACE] and not is_jump:
-            is_jump = True
         if pygame.mouse.get_pressed()[0]:
             player.attack = True
+            if not is_jump:
+                sword_sound.play()
         else:
             player.attack = False
         if all_keys[pygame.K_a] and not all_keys[pygame.K_d] and not all_keys[pygame.K_LSHIFT]:
@@ -341,35 +425,72 @@ while running:
         elif ((all_keys[pygame.K_d] and all_keys[pygame.K_a]) or (not all_keys[pygame.K_d]) and
               (not all_keys[pygame.K_d])):
             now_step = 0
+        if player.now_move == 'hurt':
+            damage_sound.play()
         screen.blit(fone, (0, 0))
         player.update_frame()
-        enemy.update_frame()
+        for enemy in enemies:
+            enemy.update_frame()
         player.control(now_step, 0)
         player.collid()
         player.nova_move()
         player.check()
-        enemy.check()
-        player_sprite.draw(screen)
+        for enemy in enemies:
+            enemy.check()
+        all_sprites.draw(screen)
         platforms.draw(screen)
         camera.update(player)
 
-        if player.change:
+        if player.change and player.now_move != 'death':
             np = player.on_platform
             now = player.now_move
             x, y = player.rect.x, player.rect.y
             nd = player.last_direction
             lh = player.health
-            player_sprite.remove(player)
+            all_sprites.remove(player)
             player = Player(moves[now][0], moves[now][1], 1, x, y, now, np)
             player.last_direction = nd
             player.health = lh
-        if enemy.change:
-            now = enemy.now_move
-            x, y = enemy.rect.x, enemy.rect.y
-            player_sprite.remove(enemy)
-            enemy = Enemy(moves_enemy[now][0], moves_enemy[now][1], 1, x, y, now)
-        enemy.updatee()
+        elif player.now_move == 'death':
+            death()
+        for enemy in enemies:
+            if enemy.change and enemy.now_move != 'death':
+                now = enemy.now_move
+                x, y = enemy.rect.x, enemy.rect.y
+                all_sprites.remove(enemy)
+                enemies.remove(enemy)
+                enemies.append(Enemy(moves_enemy[now][0], moves_enemy[now][1], 1, x, y, now))
+            elif enemy.now_move == 'death':
+                all_sprites.remove(enemy)
+                score += 50
+                enemies.remove(enemy)
+        for enemy in enemies:
+            enemy.updatee()
+
+        font = pygame.font.Font('Pixelfraktur.ttf', 30)
+        text_surface = font.render('Score:', True, (255, 255, 255))
+        text_rect = text_surface.get_rect(center=(50, 25))
+        screen.blit(text_surface, text_rect)
+
+        font = pygame.font.Font('Pixelfraktur.ttf', 30)
+        text_surface = font.render(str(score), True, (255, 255, 255))
+        text_rect = text_surface.get_rect(center=(150, 25))
+        screen.blit(text_surface, text_rect)
+
+        font = pygame.font.Font('Pixelfraktur.ttf', 30)
+        text_surface = font.render('Health:', True, pygame.Color('red'))
+        text_rect = text_surface.get_rect(center=(50, 50))
+        screen.blit(text_surface, text_rect)
+
+        font = pygame.font.Font('Pixelfraktur.ttf', 30)
+        text_surface = font.render(str(player.health), True, pygame.Color('red'))
+        text_rect = text_surface.get_rect(center=(150, 50))
+        screen.blit(text_surface, text_rect)
+
         pygame.display.flip()
         clock.tick(20)
+        time += 1
+        if time % cnst == 0:
+            enemies.append(Enemy(load_image('Skeleton/Idle.png'), 7, 1, -100, 550, 'idle'))
     else:
         pause_menu()

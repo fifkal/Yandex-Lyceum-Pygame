@@ -13,6 +13,7 @@ lt = 0
 screen = pygame.display.set_mode((width, height))
 clock = pygame.time.Clock()
 pygame.display.set_caption('Menu')
+
 fone = pygame.image.load('fone_images/new_menu_fone.jpg')
 settings_fone = pygame.image.load('fone_images/setting_fone.png')
 return_fone = pygame.image.load('fone_images/return_fone.jpg')
@@ -20,6 +21,8 @@ volume_fone = pygame.image.load('fone_images/volume_fone.png')
 customize_fone = pygame.image.load('fone_images/customize_fone.jpg')
 song = pygame.mixer.Sound('sound_effects/16-Bit Starter Pack/Various Themes/Origins.ogg')
 click = pygame.mixer.Sound('sound_effects/mixkit-modern-technology-select-3124.wav')
+level = pygame.image.load('fone_images/levels_fone.jpg')
+level = pygame.transform.scale(level, (960, 600))
 song.set_volume(0.5)
 player_sprite = pygame.sprite.Group()
 pygame.init()
@@ -67,11 +70,11 @@ class AnimatedSprite(pygame.sprite.Sprite):  # создание спрайтов
 
 player = AnimatedSprite(load_image('Enchantress/Idle.png'), 5, 1, 415, 210)
 players = [{'idle': (load_image('Enchantress/Idle.png'), 5), 'step': (load_image('Enchantress/Walk.png'), 8),
-             'step_left': (load_image('Enchantress/Walk_left.png'), 8), 'run': (load_image('Enchantress/Run.png'), 8),
-             'run_left': (load_image('Enchantress/Run_left.png'), 8), 'jump': (load_image('Enchantress/Jump.png'), 8),
-             'attack': (load_image('Enchantress/Attack_2.png'), 3),
-             'attack_left': (load_image('Enchantress/Attack_2_left.png'), 3),
-             'hurt': (load_image('Enchantress/Hurt.png'), 2)},
+            'step_left': (load_image('Enchantress/Walk_left.png'), 8), 'run': (load_image('Enchantress/Run.png'), 8),
+            'run_left': (load_image('Enchantress/Run_left.png'), 8), 'jump': (load_image('Enchantress/Jump.png'), 8),
+            'attack': (load_image('Enchantress/Attack_2.png'), 3),
+            'attack_left': (load_image('Enchantress/Attack_2_left.png'), 3),
+            'hurt': (load_image('Enchantress/Hurt.png'), 2)},
            {'idle': (load_image('Knight/Idle.png'), 6), 'step': (load_image('Knight/Walk.png'), 8),
             'step_left': (load_image('Knight/Walk_left.png'), 8), 'run': (load_image('Knight/Run.png'), 7),
             'run_left': (load_image('Knight/Run_left.png'), 7), 'jump': (load_image('Knight/Jump.png'), 6),
@@ -112,10 +115,8 @@ def main_menu():
                 click.play()
                 setting_menu()
             if event.type == pygame.USEREVENT and event.button == start_button:
-                pygame.quit()
-                print(cnt)
-                runpy.run_module(mod_name="player")
-                sys.exit()
+                click.play()
+                levels()
             if event.type == pygame.USEREVENT and event.button == exit_button:
                 click.play()
                 quit_menu()
@@ -140,10 +141,10 @@ def main_menu():
 
 def setting_menu():
     volume_button = Button(width / 2 - (252 / 2), 150, 252, 74, '',
-                          'buttons/Volume/Volume1.png', 'buttons/Volume/Volume4.png')
+                           'buttons/Volume/Volume1.png', 'buttons/Volume/Volume4.png')
 
     escape_button = Button(width / 2 - (252 / 2), 250, 252, 74, '',
-                          'buttons/Back/Back1.png', 'buttons/Back/Back4.png')
+                           'buttons/Back/Back1.png', 'buttons/Back/Back4.png')
 
     running = True
     while running:
@@ -176,10 +177,10 @@ def setting_menu():
 
 def quit_menu():
     return_button = Button(width / 2 - (252 / 2), 150, 252, 74, '',
-                          'buttons/Back/Back1.png', 'buttons/Back/Back4.png')
+                           'buttons/Back/Back1.png', 'buttons/Back/Back4.png')
 
     escape_button = Button(width / 2 - (252 / 2), 250, 252, 74, '',
-                          'buttons/Quit/Quit1.png', 'buttons/Quit/Quit4.png')
+                           'buttons/Quit/Quit1.png', 'buttons/Quit/Quit4.png')
 
     running = True
     while running:
@@ -213,11 +214,11 @@ def quit_menu():
 
 def volume_menu():
     swipper_button = Button(width / 2 - (252 / 2), 150, 252, 74, '',
-                          'buttons/Volume/Swiper/Swiper1.png')
+                            'buttons/Volume/Swiper/Swiper1.png')
     return_button = Button(width / 2 - (252 / 2), 250, 252, 74, '',
                            'buttons/Back/Back1.png', 'buttons/Back/Back4.png')
     slider = Button(width / 2 - (252 / 2), 150, 252, 74, '',
-                   'buttons/Volume/Swiper/Swiper2.png')
+                    'buttons/Volume/Swiper/Swiper2.png')
 
     running = True
     sound = False
@@ -303,12 +304,15 @@ def customize():
 
 
 def levels():
-    swipper_button = Button(width / 2 - (252 / 2), 150, 74, 74, '',
-                            'buttons/Numbers/0.png')
+    level_1 = Button(width / 2 - (252 / 2) - 40, 150, 74, 74, '',
+                            'buttons/Numbers/1.png')
+    level_2 = Button(width / 2 - 40, 150, 74, 74, '',
+                     'buttons/Numbers/2.png')
+    level_3 = Button(width / 2 + (252 / 2) - 40, 150, 74, 74, '',
+                     'buttons/Numbers/3.png')
+
     return_button = Button(width / 2 - (252 / 2), 250, 252, 74, '',
                            'buttons/Back/Back1.png', 'buttons/Back/Back4.png')
-    slider = Button(width / 2 - (252 / 2), 150, 252, 74, '',
-                    'buttons/Volume/Swiper/Swiper2.png')
 
     running = True
     sound = False
@@ -321,25 +325,22 @@ def levels():
             if event.type == pygame.USEREVENT and event.button == return_button:
                 click.play()
                 main_menu()
-            if event.type == pygame.USEREVENT and event.button == swipper_button:
-                sound = True
-            if event.type == pygame.MOUSEBUTTONUP:
-                sound = False
-            for btn in [swipper_button, return_button, slider]:
+            if event.type == pygame.USEREVENT and event.button == level_1:
+                click.play()
+                pygame.quit()
+                runpy.run_module(mod_name="player")
+                sys.exit()
+            for btn in [level_1, level_2, level_3, return_button]:
                 btn.handle_event(event)
                 btn.check_hover(pygame.mouse.get_pos())
-        screen.blit(volume_fone, (0, 0))
+        screen.blit(level, (0, 0))
         font = pygame.font.Font('Pixelfraktur.ttf', 72)
-        text_surface = font.render('Cloudborn', True, (255, 255, 255))
+        text_surface = font.render('Cloudborn', True, (0, 0, 0))
         text_rect = text_surface.get_rect(center=(width / 2, 100))
         screen.blit(text_surface, text_rect)
-        if sound:
-            slider.move_slider(pygame.mouse.get_pos())
-        for btn in [swipper_button, return_button, slider]:
+        for btn in [level_1, level_2, level_3, return_button]:
             btn.draw(screen)
-        song.set_volume((slider.rect.centerx - (width / 2 - (252 / 2))) / swipper_button.width)
         pygame.display.flip()
-
 
 
 song.play(-1)
