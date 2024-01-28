@@ -354,7 +354,7 @@ moves_enemy = {'idle': (load_image('Skeleton/Idle.png'), 7), 'walk': (load_image
                'attack': (load_image('Skeleton/Attack_2.png'), 4),
                'attack_left': (load_image('Skeleton/Attack_2_left.png'), 4),
                'hurt': (load_image('Skeleton/Hurt.png'), 3), 'death': (load_image('Skeleton/Dead.png'), 3)}
-level = [x for x in open('levels/level1')]
+level = [x for x in open('levels/level3')]
 x = y = 0  # координаты
 score = 0
 for row in level:  # вся строка
