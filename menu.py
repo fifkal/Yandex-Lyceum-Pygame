@@ -2,6 +2,7 @@ import pygame
 import sys
 import os
 from button import Button
+import main
 import runpy
 cursor1 = pygame.image.load('Ai_Cursor_Open.png')
 
@@ -88,7 +89,7 @@ players = [{'idle': (load_image('Enchantress/Idle.png'), 5), 'step': (load_image
             'attack_left': (load_image('Musketeer/Attack_2_left.png'), 4),
             'hurt': (load_image('Musketeer/Hurt.png'), 2)}
            ]
-levelss = [[x for x in open('levels/level1')], [x for x in open('levels/level2')], [x for x in open('levels/level3')]]
+levelss = main.settings.y
 now_level = []
 last_cnt = 0
 cnt = 0
@@ -329,19 +330,22 @@ def levels():
                 click.play()
                 main_menu()
             if event.type == pygame.USEREVENT and event.button == level_1:
-                now_level = levelss[0]
                 click.play()
+                main.settings.choise = main.settings.player[cnt % 3]
+                main.settings.level = main.settings.y[0]
                 pygame.quit()
                 runpy.run_module(mod_name="player")
                 sys.exit()
             if event.type == pygame.USEREVENT and event.button == level_2:
-                now_level = levelss[1]
+                main.settings.level = main.settings.y[1]
+                main.settings.choise = main.settings.player[cnt % 3]
                 click.play()
                 pygame.quit()
                 runpy.run_module(mod_name="player")
                 sys.exit()
             if event.type == pygame.USEREVENT and event.button == level_3:
-                now_level = levelss[2]
+                main.settings.level = main.settings.y[2]
+                main.settings.choise = main.settings.player[cnt % 3]
                 click.play()
                 pygame.quit()
                 runpy.run_module(mod_name="player")
@@ -360,4 +364,5 @@ def levels():
 
 
 song.play(-1)
+song.set_volume(0.1)
 main_menu()

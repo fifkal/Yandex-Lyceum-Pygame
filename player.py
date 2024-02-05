@@ -3,7 +3,7 @@ import os
 import sys
 import pygame.gfxdraw
 from button import Button
-from menu import players, cnt, now_level
+import main
 import runpy
 
 all_sprites = pygame.sprite.Group()
@@ -14,12 +14,15 @@ size = width, height = 800, 800
 screen = pygame.display.set_mode(size)
 clock = pygame.time.Clock()
 fps = 10
-
 sword_sound = pygame.mixer.Sound('sound_effects/sword_sound (mp3cut.net) (2).mp3')
+sword_sound.set_volume(0.3)
 song = pygame.mixer.Sound('sound_effects/16-Bit Starter Pack/Overworld/Long Road Ahead.ogg')
 death_song = pygame.mixer.Sound('sound_effects/16-Bit Starter Pack/Towns/Remnants of What Once Was.ogg')
+death_song.set_volume(0.3)
 jump_sound = pygame.mixer.Sound('sound_effects/free-sound-1674743518 (mp3cut.net).mp3')
+jump_sound.set_volume(0.3)
 damage_sound = pygame.mixer.Sound('sound_effects/damage_sound (mp3cut.net).mp3')
+damage_sound.set_volume(0.1)
 fone = pygame.image.load('fone_images/fone.png', )
 
 
@@ -348,13 +351,13 @@ y_ground = 550
 enemy = Enemy(load_image('Skeleton/Idle.png'), 7, 1, 400, 550, 'idle')
 enemies = [enemy]
 
-moves = players[cnt % 3]
+moves = main.settings.choise
 moves_enemy = {'idle': (load_image('Skeleton/Idle.png'), 7), 'walk': (load_image('Skeleton/Walk.png'), 8),
                'walk_left': (load_image('Skeleton/Walk_left.png'), 8),
                'attack': (load_image('Skeleton/Attack_2.png'), 4),
                'attack_left': (load_image('Skeleton/Attack_2_left.png'), 4),
                'hurt': (load_image('Skeleton/Hurt.png'), 3), 'death': (load_image('Skeleton/Dead.png'), 3)}
-level = now_level
+level = main.settings.level
 x = y = 0  # координаты
 score = 0
 for row in level:  # вся строка
@@ -376,6 +379,7 @@ time = 1
 cnst = 200
 camera = Camera(camera_configure, total_level_width, total_level_height)
 song.play(-1)
+song.set_volume(0.1)
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
